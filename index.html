@@ -1,0 +1,1230 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#00d4aa">
+  <meta name="description" content="Daily Fitness Activities - Track exercises, water intake, meals, sleep and more">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="FitDaily">
+  <title>Daily Fitness Activities</title>
+  <link rel="manifest" href="./manifest.json">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+
+<!-- ===== LOADING SCREEN ===== -->
+<div id="loading-screen">
+  <div class="loader-logo">FITDAILY</div>
+  <div class="loader-bar"><div class="loader-fill"></div></div>
+</div>
+
+<!-- ===== TOAST CONTAINER ===== -->
+<div id="toastContainer" class="toast-container"></div>
+
+<!-- ===== MAIN APP ===== -->
+<div id="app">
+
+  <!-- HEADER -->
+  <header class="app-header">
+    <div class="header-brand">
+      <div class="brand-title">FITDAILY</div>
+      <div class="brand-subtitle">Daily Fitness Activities</div>
+    </div>
+    <div class="header-actions">
+      <button class="header-btn notif-dot" id="installBtn" style="display:none" onclick="installPWA()" title="Install App">
+        <i class="fas fa-download"></i>
+      </button>
+      <button class="header-btn" onclick="requestNotificationPermission()" title="Enable Notifications">
+        <i class="fas fa-bell"></i>
+      </button>
+      <button class="header-btn" onclick="switchPage('settings')" title="Settings">
+        <i class="fas fa-cog"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- DATE STRIP -->
+  <div class="date-strip">
+    <div class="date-text" id="dateDisplay">Loading...</div>
+    <div class="streak-badge">
+      <i class="fas fa-fire"></i>
+      <span id="streakDisplay">0 Day Streak</span>
+    </div>
+  </div>
+
+  <!-- NOTIFICATION BANNER -->
+  <div id="notifBanner" class="notif-banner hidden" style="margin:12px 16px 0;border-radius:14px">
+    <i class="fas fa-bell"></i>
+    <div class="notif-banner-text">
+      <strong>Enable Notifications</strong><br>
+      Get reminders to complete exercises and drink water every hour.
+    </div>
+    <button class="btn btn-orange btn-sm notif-banner-btn" onclick="requestNotificationPermission()">
+      <i class="fas fa-bell"></i> Enable
+    </button>
+  </div>
+
+  <!-- ================================
+       PAGE: HOME
+       ================================ -->
+  <div id="page-home" class="page active">
+    <div class="main-content">
+
+      <!-- DAILY PROGRESS -->
+      <div class="section-head">
+        <div class="section-title"><i class="fas fa-chart-pie"></i> Daily Progress</div>
+        <a class="section-link" onclick="switchPage('stats')">Full Stats</a>
+      </div>
+
+      <div class="spotlight-card">
+        <div style="display:flex;align-items:center;gap:20px">
+          <div class="progress-ring-wrap" style="margin:0">
+            <div class="ring-container">
+              <svg class="ring-svg" width="140" height="140" viewBox="0 0 140 140">
+                <circle class="ring-bg" cx="70" cy="70" r="60"/>
+                <circle class="ring-fill" id="progressRingFill" cx="70" cy="70" r="60"/>
+              </svg>
+              <div class="ring-text">
+                <div class="ring-pct" id="progressPct">0%</div>
+                <div class="ring-label" id="progressLabel">Daily Goal</div>
+              </div>
+            </div>
+          </div>
+          <div style="flex:1">
+            <div style="margin-bottom:10px">
+              <div style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Exercises</div>
+              <div style="font-family:var(--font-display);font-size:1.2rem;font-weight:700;color:var(--accent-green)" id="statExercises">0/8</div>
+            </div>
+            <div style="margin-bottom:10px">
+              <div style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Water</div>
+              <div style="font-family:var(--font-display);font-size:1.2rem;font-weight:700;color:var(--accent-blue)" id="statWater">0ml</div>
+            </div>
+            <div>
+              <div style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Calories Burned</div>
+              <div style="font-family:var(--font-display);font-size:1.2rem;font-weight:700;color:var(--accent-orange)" id="statCalories">0</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- QUICK STATS -->
+      <div class="stats-grid">
+        <div class="stat-card green">
+          <div class="stat-icon"><i class="fas fa-clock"></i></div>
+          <div class="stat-value" id="statTime">0m</div>
+          <div class="stat-label">Active Time</div>
+        </div>
+        <div class="stat-card orange">
+          <div class="stat-icon"><i class="fas fa-fire"></i></div>
+          <div class="stat-value" id="statStreak">0</div>
+          <div class="stat-label">Day Streak</div>
+        </div>
+        <div class="stat-card blue">
+          <div class="stat-icon"><i class="fas fa-utensils"></i></div>
+          <div class="stat-value" id="statMeals">0</div>
+          <div class="stat-label">Meals Logged</div>
+        </div>
+        <div class="stat-card red">
+          <div class="stat-icon"><i class="fas fa-trophy"></i></div>
+          <div class="stat-value" id="statAchievements">0</div>
+          <div class="stat-label">Achievements</div>
+        </div>
+      </div>
+
+      <!-- HEALTH TIP -->
+      <div class="tip-card">
+        <div class="tip-header">
+          <i id="healthTipIcon" class="fas fa-lightbulb"></i>
+          <span>Health Tip of the Day</span>
+        </div>
+        <div class="tip-text" id="healthTipText">Loading tip...</div>
+      </div>
+
+      <!-- WATER QUICK -->
+      <div class="section-head">
+        <div class="section-title"><i class="fas fa-tint"></i> Hydration</div>
+        <a class="section-link" onclick="switchPage('water')">Track Water</a>
+      </div>
+      <div class="water-tracker">
+        <div class="flex-between">
+          <span style="font-size:0.8rem;color:var(--text-secondary)">Today's Water</span>
+          <span class="chip chip-blue"><i class="fas fa-tint"></i> <span id="waterAmount">0ml</span></span>
+        </div>
+        <div class="water-glass-row" id="waterGlasses"></div>
+        <div class="water-meta">
+          <div class="water-amount" id="waterAmountBig">0ml</div>
+          <div class="water-goal" id="waterGoalDisplay">Goal: 2000ml</div>
+        </div>
+        <div class="progress-bar-wrap" style="margin:10px 0 0">
+          <div class="progress-bar-track"><div class="progress-bar-fill" id="waterBar" style="width:0%;--start-color:var(--accent-blue);--end-color:var(--accent-green)"></div></div>
+        </div>
+        <div class="water-btn-row">
+          <button class="water-btn" onclick="addWater(1)"><i class="fas fa-plus"></i> 1 Glass</button>
+          <button class="water-btn" onclick="addWater(2)"><i class="fas fa-plus"></i> 2 Glasses</button>
+          <button class="water-btn primary" onclick="removeWater()"><i class="fas fa-minus"></i> Remove</button>
+        </div>
+      </div>
+
+      <!-- EXERCISES QUICK -->
+      <div class="section-head">
+        <div class="section-title"><i class="fas fa-dumbbell"></i> Today's Exercises</div>
+        <a class="section-link" onclick="switchPage('exercises')">View All</a>
+      </div>
+      <div class="exercise-list" id="exerciseList"></div>
+      <div style="display:flex;gap:10px;margin-bottom:16px">
+        <button class="btn btn-primary" style="flex:1" onclick="openPopup('addExercisePopup')">
+          <i class="fas fa-plus"></i> Add Exercise
+        </button>
+        <button class="btn btn-secondary" onclick="markAllExercisesDone()">
+          <i class="fas fa-check-double"></i> All Done
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================================
+       PAGE: EXERCISES
+       ================================ -->
+  <div id="page-exercises" class="page">
+    <div class="main-content">
+      <div class="section-head" style="margin-top:16px">
+        <div class="section-title"><i class="fas fa-dumbbell"></i> Exercise Tracker</div>
+        <span class="chip chip-green" id="exCompletedChip">0/8</span>
+      </div>
+
+      <!-- Tab Nav -->
+      <div class="tab-nav" id="exTabs">
+        <button class="tab-btn active" data-tab="all" onclick="switchTab('all','exTabs');renderExerciseTabFilter('all')"><i class="fas fa-list"></i> All</button>
+        <button class="tab-btn" data-tab="strength" onclick="switchTab('strength','exTabs');renderExerciseTabFilter('strength')"><i class="fas fa-dumbbell"></i> Strength</button>
+        <button class="tab-btn" data-tab="cardio" onclick="switchTab('cardio','exTabs');renderExerciseTabFilter('cardio')"><i class="fas fa-bolt"></i> Cardio</button>
+        <button class="tab-btn" data-tab="core" onclick="switchTab('core','exTabs');renderExerciseTabFilter('core')"><i class="fas fa-circle"></i> Core</button>
+      </div>
+
+      <!-- Stats Bar -->
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-label">
+          <span>Exercise Completion</span>
+          <span id="exPctLabel">0%</span>
+        </div>
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill" id="exProgressBar" style="width:0%"></div>
+        </div>
+      </div>
+
+      <div class="exercise-list" id="fullExerciseList"></div>
+
+      <!-- Calorie Summary -->
+      <div class="chart-wrap">
+        <div class="chart-title"><i class="fas fa-fire" style="color:var(--accent-orange)"></i> Calorie Burn</div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="font-family:var(--font-display);font-size:2rem;font-weight:700;color:var(--accent-orange)" id="totalCalBurned">0</div>
+            <div style="font-size:0.72rem;color:var(--text-muted)">Calories Burned Today</div>
+          </div>
+          <div>
+            <div style="font-family:var(--font-display);font-size:2rem;font-weight:700;color:var(--accent-green)" id="exTimeTotal">0</div>
+            <div style="font-size:0.72rem;color:var(--text-muted)">Minutes Active</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Workout Timer -->
+      <div class="chart-wrap">
+        <div class="chart-title"><i class="fas fa-stopwatch" style="color:var(--accent-green)"></i> Workout Timer</div>
+        <div class="timer-display" id="timerDisplay">00:00</div>
+        <div class="timer-controls">
+          <button class="btn btn-primary btn-sm" id="timerStart" onclick="startTimer()"><i class="fas fa-play"></i> Start</button>
+          <button class="btn btn-secondary btn-sm" id="timerPause" style="display:none" onclick="pauseTimer()"><i class="fas fa-pause"></i> Pause</button>
+          <button class="btn btn-secondary btn-sm" onclick="resetTimer()"><i class="fas fa-undo"></i> Reset</button>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+          <button class="btn btn-secondary btn-sm" onclick="startCountdown(30,()=>showToast('Rest over!','success','bell'))"><i class="fas fa-hourglass"></i> 30s Rest</button>
+          <button class="btn btn-secondary btn-sm" onclick="startCountdown(60,()=>showToast('Rest over!','success','bell'))"><i class="fas fa-hourglass"></i> 1m Rest</button>
+          <button class="btn btn-secondary btn-sm" onclick="startCountdown(90,()=>showToast('Rest over!','success','bell'))"><i class="fas fa-hourglass"></i> 90s Rest</button>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-bottom:20px">
+        <button class="btn btn-primary" style="flex:1" onclick="openPopup('addExercisePopup')"><i class="fas fa-plus"></i> Add Exercise</button>
+        <button class="btn btn-danger" onclick="resetExercises()"><i class="fas fa-undo"></i> Reset</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================================
+       PAGE: WATER
+       ================================ -->
+  <div id="page-water" class="page">
+    <div class="main-content">
+      <div class="section-head" style="margin-top:16px">
+        <div class="section-title"><i class="fas fa-tint"></i> Water Tracker</div>
+        <button class="btn btn-secondary btn-sm" onclick="openPopup('waterSettingsPopup')"><i class="fas fa-cog"></i> Settings</button>
+      </div>
+
+      <!-- Big water display -->
+      <div class="spotlight-card" style="text-align:center">
+        <div style="font-family:var(--font-display);font-size:3.5rem;font-weight:700;color:var(--accent-blue);line-height:1" id="bigWaterMl">0ml</div>
+        <div style="font-size:0.8rem;color:var(--text-muted);margin-top:6px" id="bigWaterGoalText">Goal: 2000ml (8 glasses)</div>
+        <div class="progress-bar-wrap" style="margin:16px 0 0">
+          <div class="progress-bar-track" style="height:10px;border-radius:10px">
+            <div class="progress-bar-fill" id="bigWaterBar" style="width:0%;--start-color:var(--accent-blue);--end-color:var(--accent-green);height:100%"></div>
+          </div>
+        </div>
+        <div style="font-size:0.8rem;color:var(--text-secondary);margin-top:8px"><span id="waterPctText">0%</span> of daily goal</div>
+      </div>
+
+      <!-- Glasses display -->
+      <div class="water-tracker">
+        <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px">Click a glass to add water</div>
+        <div class="water-glass-row" id="bigWaterGlasses"></div>
+        <div class="water-btn-row" style="margin-top:16px">
+          <button class="water-btn" onclick="addWater(1)"><i class="fas fa-plus"></i> +250ml</button>
+          <button class="water-btn" onclick="addWater(1)" id="customWaterBtn"><i class="fas fa-tint"></i> +1 Glass</button>
+          <button class="water-btn" onclick="removeWater()"><i class="fas fa-minus"></i> Remove</button>
+          <button class="water-btn" onclick="resetWater()"><i class="fas fa-undo"></i> Reset</button>
+        </div>
+      </div>
+
+      <!-- Water Tips -->
+      <div style="margin-bottom:12px">
+        <div class="section-head"><div class="section-title"><i class="fas fa-lightbulb"></i> Hydration Tips</div></div>
+        <div id="hydrationTipsList"></div>
+      </div>
+
+      <!-- Weekly Water Chart -->
+      <div class="chart-wrap">
+        <div class="chart-title">Weekly Water Intake</div>
+        <div id="weeklyWaterChart"></div>
+      </div>
+
+      <!-- Water Benefits Info -->
+      <div class="tip-card">
+        <div class="tip-header"><i class="fas fa-info-circle"></i><span>Why Hydration Matters</span></div>
+        <div class="tip-text">Your body is 60% water. Proper hydration improves energy levels, brain function, digestion, skin health, and physical performance. Aim for 8 glasses (2L) per day — more if active or in hot weather.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================================
+       PAGE: NUTRITION
+       ================================ -->
+  <div id="page-nutrition" class="page">
+    <div class="main-content">
+      <div class="section-head" style="margin-top:16px">
+        <div class="section-title"><i class="fas fa-utensils"></i> Nutrition Tracker</div>
+        <button class="btn btn-primary btn-sm" onclick="openPopup('addMealPopup')"><i class="fas fa-plus"></i> Add Meal</button>
+      </div>
+
+      <!-- Calorie Summary -->
+      <div class="stats-grid">
+        <div class="stat-card orange">
+          <div class="stat-icon"><i class="fas fa-fire"></i></div>
+          <div class="stat-value" id="totalKcalCard">0</div>
+          <div class="stat-label">kcal consumed</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-icon"><i class="fas fa-chart-bar"></i></div>
+          <div class="stat-value" id="calGoalCard">2000</div>
+          <div class="stat-label">kcal goal</div>
+        </div>
+        <div class="stat-card blue">
+          <div class="stat-icon"><i class="fas fa-drumstick-bite"></i></div>
+          <div class="stat-value" id="totalProteinCard">0g</div>
+          <div class="stat-label">protein</div>
+        </div>
+        <div class="stat-card red">
+          <div class="stat-icon"><i class="fas fa-balance-scale"></i></div>
+          <div class="stat-value" id="calBalanceCard">0</div>
+          <div class="stat-label">kcal balance</div>
+        </div>
+      </div>
+
+      <!-- Calorie Progress -->
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-label">
+          <span>Calorie Intake</span>
+          <span id="calorieGoalDisplay">Goal: 2000 kcal</span>
+        </div>
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill" id="calorieBar" style="width:0%;--start-color:var(--accent-orange);--end-color:var(--accent-red)"></div>
+        </div>
+      </div>
+
+      <!-- Macros Bar -->
+      <div class="chart-wrap">
+        <div class="chart-title">Macro Nutrients</div>
+        <div style="display:flex;gap:10px;justify-content:space-around;text-align:center">
+          <div>
+            <div style="font-family:var(--font-display);font-size:1.4rem;font-weight:700;color:var(--accent-blue)" id="carbsDisplay">0g</div>
+            <div style="font-size:0.68rem;color:var(--text-muted)">Carbs</div>
+          </div>
+          <div>
+            <div style="font-family:var(--font-display);font-size:1.4rem;font-weight:700;color:var(--accent-green)" id="proteinDisplay">0g</div>
+            <div style="font-size:0.68rem;color:var(--text-muted)">Protein</div>
+          </div>
+          <div>
+            <div style="font-family:var(--font-display);font-size:1.4rem;font-weight:700;color:var(--accent-orange)" id="fatDisplay">0g</div>
+            <div style="font-size:0.68rem;color:var(--text-muted)">Fat</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Meal List -->
+      <div class="section-head">
+        <div class="section-title"><i class="fas fa-list"></i> Today's Meals</div>
+        <span class="chip chip-orange" id="totalCaloriesDisplay">0 kcal</span>
+      </div>
+      <div id="mealList"></div>
+
+      <!-- Nutrition Tips -->
+      <div class="tip-card">
+        <div class="tip-header"><i class="fas fa-apple-alt"></i><span>Nutrition Tip</span></div>
+        <div class="tip-text">Eat balanced meals with proteins, complex carbs, and healthy fats. Include fiber-rich vegetables in every meal. Avoid processed foods and excessive sugar.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================================
+       PAGE: HEALTH
+       ================================ -->
+  <div id="page-health" class="page">
+    <div class="main-content">
+      <div class="section-head" style="margin-top:16px">
+        <div class="section-title"><i class="fas fa-heartbeat"></i> Health Hub</div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tab-nav" id="healthTabs">
+        <button class="tab-btn active" data-tab="sleep" onclick="switchTab('sleep','healthTabs')"><i class="fas fa-moon"></i> Sleep</button>
+        <button class="tab-btn" data-tab="mood" onclick="switchTab('mood','healthTabs')"><i class="fas fa-heart"></i> Mood</button>
+        <button class="tab-btn" data-tab="bmi" onclick="switchTab('bmi','healthTabs')"><i class="fas fa-weight"></i> BMI</button>
+        <button class="tab-btn" data-tab="tips" onclick="switchTab('tips','healthTabs')"><i class="fas fa-lightbulb"></i> Tips</button>
+      </div>
+
+      <!-- Sleep Tab -->
+      <div class="tab-panel active" id="tab-sleep">
+        <div class="chart-wrap">
+          <div class="chart-title">Sleep Tracker</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+            <div>
+              <div style="font-family:var(--font-display);font-size:2.5rem;font-weight:700;color:var(--accent-purple)" id="sleepHoursDisplay">--</div>
+              <div style="font-size:0.72rem;color:var(--text-muted)" id="sleepQualityDisplay">Not logged</div>
+            </div>
+            <div>
+              <div style="font-size:0.72rem;color:var(--text-muted);margin-bottom:4px">7-day avg</div>
+              <div style="font-family:var(--font-display);font-size:1.4rem;font-weight:700;color:var(--text-secondary)" id="sleepAvgDisplay">--</div>
+            </div>
+          </div>
+          <button class="btn btn-full" style="background:rgba(155,89,182,0.2);border:1px solid rgba(155,89,182,0.4);color:var(--accent-purple)" onclick="openPopup('sleepPopup')">
+            <i class="fas fa-moon"></i> Log Tonight's Sleep
+          </button>
+        </div>
+
+        <!-- Sleep Guide -->
+        <div class="chart-wrap">
+          <div class="chart-title">Sleep Recommendations</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px;background:var(--bg-input);border-radius:8px">
+              <span style="font-size:0.82rem;color:var(--text-secondary)">Adults (18-64)</span>
+              <span style="font-weight:600;color:var(--accent-purple)">7-9 hours</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px;background:var(--bg-input);border-radius:8px">
+              <span style="font-size:0.82rem;color:var(--text-secondary)">Older Adults (65+)</span>
+              <span style="font-weight:600;color:var(--accent-purple)">7-8 hours</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px;background:var(--bg-input);border-radius:8px">
+              <span style="font-size:0.82rem;color:var(--text-secondary)">Teenagers (14-17)</span>
+              <span style="font-weight:600;color:var(--accent-purple)">8-10 hours</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="tip-card">
+          <div class="tip-header"><i class="fas fa-moon"></i><span>Sleep Hygiene Tips</span></div>
+          <div class="tip-text">Keep a consistent sleep schedule. Avoid screens 1hr before bed. Keep your room cool and dark. Avoid caffeine after 2pm. Regular exercise improves sleep quality significantly.</div>
+        </div>
+      </div>
+
+      <!-- Mood Tab -->
+      <div class="tab-panel" id="tab-mood">
+        <div class="chart-wrap">
+          <div class="chart-title">How are you feeling today?</div>
+          <div class="mood-row">
+            <button class="mood-btn" data-mood="great" onclick="logMood('great')">
+              <i class="fas fa-grin-stars" style="color:var(--accent-green)"></i>
+              <span>Great</span>
+            </button>
+            <button class="mood-btn" data-mood="good" onclick="logMood('good')">
+              <i class="fas fa-smile" style="color:var(--accent-blue)"></i>
+              <span>Good</span>
+            </button>
+            <button class="mood-btn" data-mood="okay" onclick="logMood('okay')">
+              <i class="fas fa-meh" style="color:var(--accent-yellow)"></i>
+              <span>Okay</span>
+            </button>
+            <button class="mood-btn" data-mood="bad" onclick="logMood('bad')">
+              <i class="fas fa-frown" style="color:var(--accent-orange)"></i>
+              <span>Bad</span>
+            </button>
+            <button class="mood-btn" data-mood="terrible" onclick="logMood('terrible')">
+              <i class="fas fa-tired" style="color:var(--accent-red)"></i>
+              <span>Terrible</span>
+            </button>
+          </div>
+          <div style="text-align:center;margin-top:8px">
+            <span style="font-size:0.82rem;color:var(--text-muted)">Current: </span>
+            <span style="font-weight:600" id="currentMoodDisplay">Not logged</span>
+          </div>
+        </div>
+
+        <div class="tip-card">
+          <div class="tip-header"><i class="fas fa-brain"></i><span>Mental Wellness Tips</span></div>
+          <div class="tip-text">Exercise releases endorphins which naturally boost mood. Practice gratitude daily. Spend time outdoors. Connect with friends and family. Meditation for 10 minutes can reduce stress significantly.</div>
+        </div>
+      </div>
+
+      <!-- BMI Tab -->
+      <div class="tab-panel" id="tab-bmi">
+        <div class="chart-wrap">
+          <div class="chart-title">Body Mass Index (BMI)</div>
+          <div class="bmi-result">
+            <div class="bmi-value" id="bmiValue">--</div>
+            <div class="bmi-category" id="bmiCategory">Enter your stats in Settings</div>
+            <div class="bmi-scale">
+              <div class="bmi-segment" style="background:#0084ff;flex:2"></div>
+              <div class="bmi-segment" style="background:#00d4aa;flex:2.5"></div>
+              <div class="bmi-segment" style="background:#f1c40f;flex:2.5"></div>
+              <div class="bmi-segment" style="background:#ff3366;flex:3"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:0.6rem;color:var(--text-muted)">
+              <span>Under</span><span>Normal</span><span>Over</span><span>Obese</span>
+            </div>
+          </div>
+          <div style="margin-top:16px">
+            <div style="display:flex;justify-content:space-between;padding:8px;background:var(--bg-input);border-radius:8px;margin-bottom:6px">
+              <span style="font-size:0.8rem;color:var(--text-secondary)">Ideal Weight</span>
+              <span id="idealWeightDisplay" style="font-weight:600;color:var(--accent-green)">--</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:8px;background:var(--bg-input);border-radius:8px;margin-bottom:6px">
+              <span style="font-size:0.8rem;color:var(--text-secondary)">Daily Water Need</span>
+              <span id="waterNeedDisplay" style="font-weight:600;color:var(--accent-blue)">--</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:8px;background:var(--bg-input);border-radius:8px;margin-bottom:6px">
+              <span style="font-size:0.8rem;color:var(--text-secondary)">Daily Protein Need</span>
+              <span id="proteinNeedDisplay" style="font-weight:600;color:var(--accent-orange)">--</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:8px;background:var(--bg-input);border-radius:8px">
+              <span style="font-size:0.8rem;color:var(--text-secondary)">Estimated BMR</span>
+              <span id="bmrDisplay" style="font-weight:600;color:var(--accent-purple)">--</span>
+            </div>
+          </div>
+          <button class="btn btn-full btn-secondary mt-12" onclick="openPopup('weightPopup')">
+            <i class="fas fa-weight"></i> Log Weight
+          </button>
+        </div>
+
+        <!-- Weight History -->
+        <div class="chart-wrap">
+          <div class="chart-title">Weight History</div>
+          <div id="weightChartContainer"></div>
+          <div style="margin-top:8px;display:flex;justify-content:space-between">
+            <span style="font-size:0.78rem;color:var(--text-muted)">Current: <span id="currentWeightDisplay" style="color:var(--accent-green)">--</span></span>
+            <span style="font-size:0.78rem;color:var(--text-muted)">Change: <span id="weightChangeDisplay" style="color:var(--accent-orange)">--</span></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tips Tab -->
+      <div class="tab-panel" id="tab-tips">
+        <div id="allTipsList"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================================
+       PAGE: STATS
+       ================================ -->
+  <div id="page-stats" class="page">
+    <div class="main-content">
+      <div class="section-head" style="margin-top:16px">
+        <div class="section-title"><i class="fas fa-chart-bar"></i> Statistics</div>
+      </div>
+
+      <!-- Weekly Overview -->
+      <div class="chart-wrap">
+        <div class="chart-title">Weekly Exercise Completion</div>
+        <div id="weeklyChart"></div>
+      </div>
+      <div class="chart-wrap">
+        <div class="chart-title">Weekly Water Intake</div>
+        <div id="weeklyWaterChart2"></div>
+      </div>
+
+      <!-- Summary Cards -->
+      <div class="section-head"><div class="section-title"><i class="fas fa-trophy"></i> Achievements</div></div>
+      <div class="achievement-grid" id="achievementGrid"></div>
+
+      <!-- Lifetime Stats -->
+      <div class="chart-wrap" style="margin-top:12px">
+        <div class="chart-title">Lifetime Summary</div>
+        <div style="display:flex;flex-direction:column;gap:8px" id="lifetimeStats"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================================
+       PAGE: SETTINGS
+       ================================ -->
+  <div id="page-settings" class="page">
+    <div class="main-content">
+      <div class="section-head" style="margin-top:16px">
+        <div class="section-title"><i class="fas fa-cog"></i> Settings</div>
+      </div>
+
+      <div class="settings-group">
+        <div class="settings-group-title">Profile</div>
+        <div class="settings-item" onclick="openPopup('profilePopup')">
+          <div class="settings-icon"><i class="fas fa-user"></i></div>
+          <div class="settings-info">
+            <div class="settings-name">Edit Profile</div>
+            <div class="settings-desc">Name, age, weight, height, goals</div>
+          </div>
+          <i class="fas fa-chevron-right settings-arrow"></i>
+        </div>
+        <div class="settings-item" onclick="openPopup('waterSettingsPopup')">
+          <div class="settings-icon blue"><i class="fas fa-tint"></i></div>
+          <div class="settings-info">
+            <div class="settings-name">Water Goals</div>
+            <div class="settings-desc">Set daily water intake target</div>
+          </div>
+          <i class="fas fa-chevron-right settings-arrow"></i>
+        </div>
+        <div class="settings-item" onclick="openPopup('weightPopup')">
+          <div class="settings-icon orange"><i class="fas fa-weight"></i></div>
+          <div class="settings-info">
+            <div class="settings-name">Log Weight</div>
+            <div class="settings-desc">Track your weight progress</div>
+          </div>
+          <i class="fas fa-chevron-right settings-arrow"></i>
+        </div>
+      </div>
+
+      <div class="settings-group">
+        <div class="settings-group-title">Notifications</div>
+        <div class="settings-item" onclick="requestNotificationPermission()">
+          <div class="settings-icon orange"><i class="fas fa-bell"></i></div>
+          <div class="settings-info">
+            <div class="settings-name">Enable Notifications</div>
+            <div class="settings-desc" id="notifStatusDesc">Click to enable push notifications</div>
+          </div>
+          <div class="toggle-wrap"><div class="toggle" id="toggle_notifEnabled"></div></div>
+        </div>
+        <div class="settings-item" onclick="openPopup('reminderPopup')">
+          <div class="settings-icon blue"><i class="fas fa-clock"></i></div>
+          <div class="settings-info">
+            <div class="settings-name">Reminder Interval</div>
+            <div class="settings-desc" id="reminderDesc">Remind every 60 minutes</div>
+          </div>
+          <i class="fas fa-chevron-right settings-arrow"></i>
+        </div>
+        <div class="settings-item" onclick="sendTestNotification()">
+          <div class="settings-icon"><i class="fas fa-paper-plane"></i></div>
+          <div class="settings-info">
+            <div class="settings-name">Send Test Notification</div>
+            <div class="settings-desc">Test if notifications are working</div>
+          </div>
+          <i class="fas fa-chevron-right settings-arrow"></i>
+        </div>
+      </div>
+
+      <div class="settings-group">
+        <div class="settings-group-title">App</div>
+        <div class="settings-item" onclick="toggleSetting('sound');updateSettingToggles()">
+          <div class="settings-icon purple"><i class="fas fa-volume-up"></i></div>
+          <div class="settings-info">
+            <div class="settings-name">Sound</div>
+            <div class="settings-desc">App sounds and alerts</div>
+          </div>
+          <div class="toggle-wrap"><div class="toggle" id="toggle_sound"></div></div>
+        </div>
+        <div class="settings-item" onclick="toggleSetting('vibration');updateSettingToggles()">
+          <div class="settings-icon"><i class="fas fa-mobile-alt"></i></div>
+          <div class="settings-info">
+            <div class="settings-name">Vibration</div>
+            <div class="settings-desc">Haptic feedback on actions</div>
+          </div>
+          <div class="toggle-wrap"><div class="toggle" id="toggle_vibration"></div></div>
+        </div>
+        <div class="settings-item" onclick="exportData()">
+          <div class="settings-icon blue"><i class="fas fa-download"></i></div>
+          <div class="settings-info">
+            <div class="settings-name">Export Data</div>
+            <div class="settings-desc">Download your fitness data as JSON</div>
+          </div>
+          <i class="fas fa-chevron-right settings-arrow"></i>
+        </div>
+        <div class="settings-item" onclick="document.getElementById('importFileInput').click()">
+          <div class="settings-icon orange"><i class="fas fa-upload"></i></div>
+          <div class="settings-info">
+            <div class="settings-name">Import Data</div>
+            <div class="settings-desc">Restore from backup file</div>
+          </div>
+          <i class="fas fa-chevron-right settings-arrow"></i>
+        </div>
+        <input type="file" id="importFileInput" accept=".json" style="display:none" onchange="importData(this.files[0])">
+        <div class="settings-item" onclick="openPopup('clearDataPopup')">
+          <div class="settings-icon red"><i class="fas fa-trash"></i></div>
+          <div class="settings-info">
+            <div class="settings-name">Clear All Data</div>
+            <div class="settings-desc">Reset the app completely</div>
+          </div>
+          <i class="fas fa-chevron-right settings-arrow"></i>
+        </div>
+        <div class="settings-item" onclick="installPWA()">
+          <div class="settings-icon"><i class="fas fa-mobile-alt"></i></div>
+          <div class="settings-info">
+            <div class="settings-name">Install App</div>
+            <div class="settings-desc">Add to your home screen</div>
+          </div>
+          <i class="fas fa-chevron-right settings-arrow"></i>
+        </div>
+      </div>
+
+      <div style="text-align:center;padding:20px 0;color:var(--text-muted);font-size:0.72rem">
+        Daily Fitness Activities v1.2.0<br>
+        Built for your health journey
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================================
+       BOTTOM NAVIGATION
+       ================================ -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" data-page="home">
+      <i class="fas fa-home"></i>
+      <span>Home</span>
+    </button>
+    <button class="nav-item" data-page="exercises">
+      <i class="fas fa-dumbbell"></i>
+      <span>Exercise</span>
+    </button>
+    <button class="nav-item" data-page="water">
+      <i class="fas fa-tint"></i>
+      <span>Water</span>
+    </button>
+    <button class="nav-item" data-page="nutrition">
+      <i class="fas fa-utensils"></i>
+      <span>Meals</span>
+    </button>
+    <button class="nav-item" data-page="health">
+      <i class="fas fa-heartbeat"></i>
+      <span>Health</span>
+    </button>
+    <button class="nav-item" data-page="stats">
+      <i class="fas fa-chart-bar"></i>
+      <span>Stats</span>
+    </button>
+  </nav>
+
+</div>
+
+<!-- =============================================
+     POPUPS / MODALS
+     ============================================= -->
+
+<!-- ADD EXERCISE POPUP -->
+<div id="addExercisePopup" class="popup-overlay">
+  <div class="popup-sheet">
+    <div class="popup-handle"></div>
+    <div class="popup-title"><i class="fas fa-dumbbell"></i> Add Exercise</div>
+    <button class="popup-close" onclick="closePopup('addExercisePopup')"><i class="fas fa-times"></i></button>
+    <div class="form-group">
+      <label class="form-label">Exercise Name</label>
+      <input class="form-input" id="exName" placeholder="e.g. Push-ups, Squats...">
+    </div>
+    <div class="input-row">
+      <div class="form-group">
+        <label class="form-label">Sets</label>
+        <input class="form-input" id="exSets" type="number" placeholder="3">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Reps</label>
+        <input class="form-input" id="exReps" type="number" placeholder="15">
+      </div>
+    </div>
+    <div class="input-row">
+      <div class="form-group">
+        <label class="form-label">Duration (min)</label>
+        <input class="form-input" id="exDuration" type="number" placeholder="10">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Calories</label>
+        <input class="form-input" id="exCalories" type="number" placeholder="80">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Category</label>
+      <select class="form-input" id="exCategory">
+        <option value="strength">Strength</option>
+        <option value="cardio">Cardio</option>
+        <option value="core">Core</option>
+        <option value="flexibility">Flexibility</option>
+        <option value="custom">Custom</option>
+      </select>
+    </div>
+    <button class="btn btn-primary btn-full" onclick="handleAddExerciseForm()">
+      <i class="fas fa-plus"></i> Add Exercise
+    </button>
+  </div>
+</div>
+
+<!-- ADD MEAL POPUP -->
+<div id="addMealPopup" class="popup-overlay">
+  <div class="popup-sheet">
+    <div class="popup-handle"></div>
+    <div class="popup-title"><i class="fas fa-utensils"></i> Log Meal</div>
+    <button class="popup-close" onclick="closePopup('addMealPopup')"><i class="fas fa-times"></i></button>
+    <div class="form-group">
+      <label class="form-label">Meal Name</label>
+      <input class="form-input" id="mealName" placeholder="e.g. Oatmeal, Chicken Rice...">
+    </div>
+    <div class="input-row">
+      <div class="form-group">
+        <label class="form-label">Calories (kcal)</label>
+        <input class="form-input" id="mealCalories" type="number" placeholder="300">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Protein (g)</label>
+        <input class="form-input" id="mealProtein" type="number" placeholder="25">
+      </div>
+    </div>
+    <div class="input-row">
+      <div class="form-group">
+        <label class="form-label">Carbs (g)</label>
+        <input class="form-input" id="mealCarbs" type="number" placeholder="40">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Fat (g)</label>
+        <input class="form-input" id="mealFat" type="number" placeholder="10">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Meal Type</label>
+      <select class="form-input" id="mealType">
+        <option value="breakfast">Breakfast</option>
+        <option value="lunch">Lunch</option>
+        <option value="dinner">Dinner</option>
+        <option value="snack">Snack</option>
+        <option value="pre-workout">Pre-Workout</option>
+        <option value="post-workout">Post-Workout</option>
+      </select>
+    </div>
+    <button class="btn btn-primary btn-full" onclick="handleAddMealForm()">
+      <i class="fas fa-plus"></i> Log Meal
+    </button>
+  </div>
+</div>
+
+<!-- SLEEP POPUP -->
+<div id="sleepPopup" class="popup-overlay">
+  <div class="popup-sheet">
+    <div class="popup-handle"></div>
+    <div class="popup-title"><i class="fas fa-moon"></i> Log Sleep</div>
+    <button class="popup-close" onclick="closePopup('sleepPopup')"><i class="fas fa-times"></i></button>
+    <div class="form-group">
+      <label class="form-label">Hours Slept</label>
+      <input class="form-input" id="sleepHours" type="number" min="0" max="24" step="0.5" placeholder="7.5">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Sleep Quality</label>
+      <select class="form-input" id="sleepQuality">
+        <option value="1">1 - Poor</option>
+        <option value="2">2 - Fair</option>
+        <option value="3">3 - Good</option>
+        <option value="4">4 - Great</option>
+        <option value="5">5 - Excellent</option>
+      </select>
+    </div>
+    <button class="btn btn-full" style="background:rgba(155,89,182,0.2);border:1px solid rgba(155,89,182,0.4);color:var(--accent-purple)" onclick="handleLogSleep()">
+      <i class="fas fa-moon"></i> Save Sleep Log
+    </button>
+  </div>
+</div>
+
+<!-- WEIGHT POPUP -->
+<div id="weightPopup" class="popup-overlay">
+  <div class="popup-sheet">
+    <div class="popup-handle"></div>
+    <div class="popup-title"><i class="fas fa-weight"></i> Log Weight</div>
+    <button class="popup-close" onclick="closePopup('weightPopup')"><i class="fas fa-times"></i></button>
+    <div class="form-group">
+      <label class="form-label">Weight (kg)</label>
+      <input class="form-input" id="weightInput" type="number" step="0.1" placeholder="70.5">
+    </div>
+    <button class="btn btn-primary btn-full" onclick="handleLogWeight()">
+      <i class="fas fa-save"></i> Save Weight
+    </button>
+  </div>
+</div>
+
+<!-- PROFILE POPUP -->
+<div id="profilePopup" class="popup-overlay">
+  <div class="popup-sheet">
+    <div class="popup-handle"></div>
+    <div class="popup-title"><i class="fas fa-user"></i> Edit Profile</div>
+    <button class="popup-close" onclick="closePopup('profilePopup')"><i class="fas fa-times"></i></button>
+    <div class="input-row">
+      <div class="form-group">
+        <label class="form-label">Name</label>
+        <input class="form-input" id="userName" placeholder="Your name">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Age</label>
+        <input class="form-input" id="userAge" type="number" placeholder="25">
+      </div>
+    </div>
+    <div class="input-row">
+      <div class="form-group">
+        <label class="form-label">Weight (kg)</label>
+        <input class="form-input" id="userWeight" type="number" step="0.1" placeholder="70">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Height (cm)</label>
+        <input class="form-input" id="userHeight" type="number" placeholder="170">
+      </div>
+    </div>
+    <div class="input-row">
+      <div class="form-group">
+        <label class="form-label">Gender</label>
+        <select class="form-input" id="userGender">
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Goal</label>
+        <select class="form-input" id="userGoal">
+          <option value="fitness">General Fitness</option>
+          <option value="lose">Lose Weight</option>
+          <option value="gain">Gain Muscle</option>
+          <option value="maintain">Maintain</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn btn-primary btn-full" onclick="handleUpdateProfile()">
+      <i class="fas fa-save"></i> Save Profile
+    </button>
+  </div>
+</div>
+
+<!-- WATER SETTINGS POPUP -->
+<div id="waterSettingsPopup" class="popup-overlay">
+  <div class="popup-sheet">
+    <div class="popup-handle"></div>
+    <div class="popup-title"><i class="fas fa-tint"></i> Water Settings</div>
+    <button class="popup-close" onclick="closePopup('waterSettingsPopup')"><i class="fas fa-times"></i></button>
+    <div class="form-group">
+      <label class="form-label">Daily Goal (glasses)</label>
+      <input class="form-input" id="waterGoalInput" type="number" min="1" max="20" placeholder="8">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Glass Size (ml)</label>
+      <select class="form-input" id="glassSizeInput">
+        <option value="200">200ml (Small)</option>
+        <option value="250" selected>250ml (Standard)</option>
+        <option value="300">300ml (Large)</option>
+        <option value="500">500ml (Bottle)</option>
+      </select>
+    </div>
+    <button class="btn btn-blue btn-full" onclick="handleWaterGoalUpdate()">
+      <i class="fas fa-save"></i> Save Settings
+    </button>
+  </div>
+</div>
+
+<!-- REMINDER SETTINGS POPUP -->
+<div id="reminderPopup" class="popup-overlay">
+  <div class="popup-sheet">
+    <div class="popup-handle"></div>
+    <div class="popup-title"><i class="fas fa-clock"></i> Reminder Settings</div>
+    <button class="popup-close" onclick="closePopup('reminderPopup')"><i class="fas fa-times"></i></button>
+    <div class="form-group">
+      <label class="form-label">Remind Every (minutes)</label>
+      <select class="form-input" id="reminderIntervalInput">
+        <option value="30">30 minutes</option>
+        <option value="60" selected>60 minutes (1 hour)</option>
+        <option value="90">90 minutes</option>
+        <option value="120">120 minutes (2 hours)</option>
+        <option value="180">180 minutes (3 hours)</option>
+      </select>
+    </div>
+    <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:14px;line-height:1.6">
+      If exercises or water goal are not completed, you will receive a reminder notification at the selected interval.
+    </p>
+    <button class="btn btn-primary btn-full" onclick="setReminderInterval(document.getElementById('reminderIntervalInput').value);closePopup('reminderPopup')">
+      <i class="fas fa-save"></i> Save Reminder
+    </button>
+  </div>
+</div>
+
+<!-- CLEAR DATA POPUP -->
+<div id="clearDataPopup" class="popup-overlay">
+  <div class="popup-sheet">
+    <div class="popup-handle"></div>
+    <div class="popup-title" style="color:var(--accent-red)"><i class="fas fa-exclamation-triangle"></i> Clear All Data</div>
+    <button class="popup-close" onclick="closePopup('clearDataPopup')"><i class="fas fa-times"></i></button>
+    <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:20px;line-height:1.7">
+      This will permanently delete all your fitness data including exercises, water logs, meals, sleep records, weight history, and achievements. This action cannot be undone.
+    </p>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-secondary" style="flex:1" onclick="closePopup('clearDataPopup')">Cancel</button>
+      <button class="btn btn-danger" style="flex:1" onclick="clearAllData();closePopup('clearDataPopup')">
+        <i class="fas fa-trash"></i> Delete All
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="./app.js"></script>
+<script>
+// ===== EXTRA RENDER FUNCTIONS (UI-specific) =====
+
+function renderExerciseTabFilter(filter) {
+  const container = document.getElementById('fullExerciseList');
+  if (!container) return;
+  const list = filter === 'all' ? state.exercises : state.exercises.filter(e => e.category === filter);
+  if (list.length === 0) {
+    container.innerHTML = `<p class="text-muted text-center" style="padding:20px;font-size:0.85rem">No ${filter} exercises</p>`;
+    return;
+  }
+  container.innerHTML = list.map(ex => `
+    <div class="exercise-item ${ex.completed ? 'completed' : ''}" style="--accent-color:var(--accent-${ex.color||'green'})" onclick="toggleExercise('${ex.id}');renderExerciseTabFilter('${filter}');updateExercisePageStats()">
+      <div class="ex-icon"><i class="${ex.icon||'fas fa-dumbbell'}"></i></div>
+      <div class="ex-info">
+        <div class="ex-name">${escapeHtml(ex.name)}</div>
+        <div class="ex-meta">${ex.sets} sets &times; ${ex.reps} reps &bull; ${ex.duration} min</div>
+        <div class="ex-calories"><i class="fas fa-fire" style="font-size:0.6rem"></i> ${ex.calories} cal</div>
+      </div>
+      <div class="ex-check"><i class="fas fa-check"></i></div>
+    </div>
+  `).join('');
+  updateExercisePageStats();
+}
+
+function updateExercisePageStats() {
+  const completed = getCompletedExercisesCount();
+  const total = state.exercises.length;
+  const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+  setElText('exCompletedChip', `${completed}/${total}`);
+  setElText('exPctLabel', pct + '%');
+  const bar = document.getElementById('exProgressBar');
+  if (bar) bar.style.width = pct + '%';
+  setElText('totalCalBurned', getTotalCaloriesBurned());
+  setElText('exTimeTotal', calculateTotalExerciseTime());
+}
+
+function updateSettingToggles() {
+  Object.keys(state.settings).forEach(k => {
+    const t = document.getElementById('toggle_' + k);
+    if (t) t.classList.toggle('on', !!state.settings[k]);
+  });
+  const notifT = document.getElementById('toggle_notifEnabled');
+  if (notifT) notifT.classList.toggle('on', state.notificationsEnabled);
+}
+
+function renderNutritionPage() {
+  const total = calculateTotalCalories();
+  const goal = getCalorieGoal();
+  const balance = getCalorieBalance();
+  setElText('totalKcalCard', total);
+  setElText('calGoalCard', goal);
+  setElText('totalProteinCard', calculateTotalProtein() + 'g');
+  setElText('calBalanceCard', (balance > 0 ? '+' : '') + balance);
+  setElText('carbsDisplay', calculateTotalCarbs() + 'g');
+  setElText('proteinDisplay', calculateTotalProtein() + 'g');
+  setElText('fatDisplay', calculateTotalFat() + 'g');
+  const bar = document.getElementById('calorieBar');
+  if (bar) bar.style.width = Math.min(100, Math.round((total / goal) * 100)) + '%';
+}
+
+function renderBMIPageExtended() {
+  const w = state.user.weight;
+  const h = state.user.height;
+  const g = state.user.gender;
+  if (!w || !h) return;
+  const ideal = getIdealWeight(h, g);
+  setElText('idealWeightDisplay', ideal + ' kg');
+  setElText('waterNeedDisplay', getDailyWaterNeed() + ' L/day');
+  setElText('proteinNeedDisplay', getProteinNeed() + ' g/day');
+  setElText('bmrDisplay', calculateBMR() + ' kcal/day');
+  setElText('currentWeightDisplay', w + ' kg');
+  const change = getWeightChange();
+  setElText('weightChangeDisplay', (change > 0 ? '+' : '') + change + ' kg');
+}
+
+function renderAllTips() {
+  const container = document.getElementById('allTipsList');
+  if (!container) return;
+  container.innerHTML = HEALTH_TIPS.map(tip => `
+    <div class="tip-card" style="margin-bottom:8px">
+      <div class="tip-header">
+        <i class="fas fa-${tip.icon}"></i>
+        <span>${tip.cat.charAt(0).toUpperCase() + tip.cat.slice(1)}</span>
+      </div>
+      <div class="tip-text">${tip.tip}</div>
+    </div>
+  `).join('');
+}
+
+function renderHydrationTips() {
+  const container = document.getElementById('hydrationTipsList');
+  if (!container) return;
+  const tips = getTipsByCategory('hydration');
+  container.innerHTML = tips.map(t => `
+    <div class="tip-card" style="margin-bottom:8px">
+      <div class="tip-header"><i class="fas fa-${t.icon}"></i><span>Hydration</span></div>
+      <div class="tip-text">${t.tip}</div>
+    </div>
+  `).join('');
+}
+
+function renderLifetimeStats() {
+  const container = document.getElementById('lifetimeStats');
+  if (!container) return;
+  const totalDays = Object.keys(state.history).length;
+  const totalEx = Object.values(state.history).reduce((s, h) => s + (h.exercises || 0), 0);
+  const totalWater = Object.values(state.history).reduce((s, h) => s + (h.water || 0), 0);
+  const avgCompletion = totalDays > 0
+    ? Math.round(Object.values(state.history).reduce((s, h) => s + (h.completionPct || 0), 0) / totalDays)
+    : 0;
+  const items = [
+    { label: 'Days Tracked', value: totalDays, icon: 'calendar', color: 'accent-green' },
+    { label: 'Total Exercises', value: totalEx, icon: 'dumbbell', color: 'accent-blue' },
+    { label: 'Total Glasses', value: totalWater, icon: 'tint', color: 'accent-blue' },
+    { label: 'Best Streak', value: state.streak + ' days', icon: 'fire', color: 'accent-orange' },
+    { label: 'Avg Completion', value: avgCompletion + '%', icon: 'chart-pie', color: 'accent-green' },
+    { label: 'Achievements', value: state.achievements.length, icon: 'trophy', color: 'accent-yellow' },
+  ];
+  container.innerHTML = items.map(item => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:var(--bg-input);border-radius:8px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <i class="fas fa-${item.icon}" style="color:var(--${item.color});width:16px"></i>
+        <span style="font-size:0.82rem;color:var(--text-secondary)">${item.label}</span>
+      </div>
+      <span style="font-family:var(--font-display);font-weight:700;color:var(--${item.color})">${item.value}</span>
+    </div>
+  `).join('');
+}
+
+function updateWaterPageRender() {
+  const bigMl = document.getElementById('bigWaterMl');
+  const bigGoal = document.getElementById('bigWaterGoalText');
+  const bigBar = document.getElementById('bigWaterBar');
+  const pctEl = document.getElementById('waterPctText');
+  const bigGlasses = document.getElementById('bigWaterGlasses');
+  const ml = getTotalWaterMl();
+  const goalMl = state.water.goal * state.water.glassSize;
+  if (bigMl) bigMl.textContent = ml + 'ml';
+  if (bigGoal) bigGoal.textContent = `Goal: ${goalMl}ml (${state.water.goal} glasses)`;
+  if (bigBar) bigBar.style.width = waterCompletionPercent() + '%';
+  if (pctEl) pctEl.textContent = waterCompletionPercent() + '%';
+  if (bigGlasses) {
+    bigGlasses.innerHTML = Array.from({ length: state.water.goal }, (_, i) => `
+      <div class="water-glass ${i < state.water.glasses ? 'filled' : ''}" onclick="addWater(1);updateWaterPageRender()" title="Click to add">
+        <i class="fas fa-tint water-glass-icon"></i>
+      </div>
+    `).join('');
+  }
+}
+
+// Override renderWaterTracker to also update water page
+const origRenderWater = renderWaterTracker;
+window.renderWaterTracker = function() {
+  origRenderWater();
+  const amBig = document.getElementById('waterAmountBig');
+  if (amBig) amBig.textContent = getTotalWaterMl() + 'ml';
+  updateWaterPageRender();
+};
+
+// Override renderMealList to also update nutrition page stats
+const origRenderMeals = renderMealList;
+window.renderMealList = function() {
+  origRenderMeals();
+  renderNutritionPage();
+};
+
+// On page switch, do extra renders
+const origSwitchPage = switchPage;
+window.switchPage = function(page) {
+  origSwitchPage(page);
+  if (page === 'exercises') { renderExerciseTabFilter('all'); }
+  if (page === 'water') { updateWaterPageRender(); renderHydrationTips(); renderWeeklyWaterChart2(); }
+  if (page === 'nutrition') { renderNutritionPage(); }
+  if (page === 'health') { renderAllTips(); renderBMIPageExtended(); renderWeightChart(); }
+  if (page === 'stats') { renderWeeklyChart(); renderWeeklyWaterChart2(); renderAchievements(); renderLifetimeStats(); }
+  if (page === 'settings') { updateSettingToggles(); renderProfileSection(); }
+};
+
+function renderWeeklyWaterChart2() {
+  const container = document.getElementById('weeklyWaterChart2');
+  if (!container) return;
+  const days = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const key = d.toISOString().split('T')[0];
+    const h = state.history[key] || {};
+    days.push({ label: getDayName(-i), water: h.water || 0, goal: h.waterGoal || state.water.goal });
+  }
+  const maxW = Math.max(...days.map(d => d.goal), 1);
+  const bars = days.map(d => {
+    const pct = Math.round((d.water / maxW) * 100);
+    return `<div class="bar-col">
+      <div class="bar-fill water" style="height:${pct}%"></div>
+      <div class="bar-label">${d.label}</div>
+    </div>`;
+  }).join('');
+  container.innerHTML = `<div class="bar-chart">${bars}</div>`;
+}
+
+// Update stat achievements display
+function updateAchievementCount() {
+  setElText('statAchievements', state.achievements.length);
+}
+const origUnlock = unlockAchievement;
+window.unlockAchievement = function(id) {
+  origUnlock(id);
+  updateAchievementCount();
+};
+
+// Initial extra renders on load
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => {
+    updateSettingToggles();
+    renderExerciseTabFilter('all');
+    updateWaterPageRender();
+    renderNutritionPage();
+    renderAllTips();
+    renderBMIPageExtended();
+    renderLifetimeStats();
+    renderWeeklyWaterChart2();
+    updateAchievementCount();
+    setElText('reminderDesc', `Remind every ${state.reminderInterval || 60} minutes`);
+  }, 200);
+});
+</script>
+</body>
+</html>
